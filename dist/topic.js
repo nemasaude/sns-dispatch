@@ -19,34 +19,47 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _a, _Topic_topic;
+var _a, _Topic_topic, _Topic_parseParams;
 Object.defineProperty(exports, "__esModule", { value: true });
 require('dotenv').config();
 var AWS = require('aws-sdk');
-AWS.config.update({ region: process.env.AWS_REGION });
 class Topic {
-    static setup(topicUrl) {
+    static setup(topicArn) {
         return __awaiter(this, void 0, void 0, function* () {
-            __classPrivateFieldSet(this, _a, topicUrl, "f", _Topic_topic);
+            __classPrivateFieldSet(this, _a, topicArn, "f", _Topic_topic);
         });
     }
-    static publish(params) {
+    static publish(message, params = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (!params.TopicArn) {
-                    params = Object.assign(Object.assign({}, params), { TopicArn: __classPrivateFieldGet(this, _a, "f", _Topic_topic) });
+                if (!__classPrivateFieldGet(this, _a, "f", _Topic_topic)) {
+                    throw "topicArn is missing";
                 }
-                const info = yield new AWS.SNS({ apiVersion: '2010-03-31' }).publish(Object.assign(Object.assign({}, params), { TopicArn: __classPrivateFieldGet(this, _a, "f", _Topic_topic) })).promise();
+                const teste = __classPrivateFieldGet(this, _a, "m", _Topic_parseParams).call(this, message, params);
+                const info = yield new AWS.SNS({ apiVersion: '2010-03-31' }).publish(teste).promise();
                 console.log("MessageID is " + info.MessageId);
                 // console.log(`Message ${params.Message} sent to the topic ${params.TopicArn}`);
             }
             catch (err) {
-                console.error(err, err.stack);
+                console.error(err);
             }
         });
     }
 }
 exports.default = Topic;
-_a = Topic;
+_a = Topic, _Topic_parseParams = function _Topic_parseParams(message, params) {
+    const _params = {};
+    for (const key in params) {
+        _params[key] = {
+            DataType: "String",
+            StringValue: params[key]
+        };
+    }
+    return {
+        Message: message,
+        TopicArn: __classPrivateFieldGet(this, _a, "f", _Topic_topic),
+        MessageAttributes: _params
+    };
+};
 _Topic_topic = { value: void 0 };
 //# sourceMappingURL=topic.js.map

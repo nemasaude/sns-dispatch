@@ -1,36 +1,47 @@
 require('dotenv').config();
 var AWS = require('aws-sdk');
-AWS.config.update({region: process.env.AWS_REGION});
-type MessageAttributesValues = {
-  DataType: string,
-  StringValue: string
-}
+// if(!process.env.AWS_REGION){
+//   console.log(`missing environment variable AWS_REGION`);
+// }
+// AWS.config.update({region: process.env.AWS_REGION});
 
 type MessageAttributes = {
-  [key: string]: MessageAttributesValues
-}
-type SnsParams = {
-  Message: string,
-  TopicArn?: string
-  MessageAttributes?: MessageAttributes
+  [key: string]: string
 }
 
 export default class Topic{
   static #topic: string
-  static async setup(topicUrl: string){
-    this.#topic = topicUrl;
+  static async setup(topicArn: string){
+    this.#topic = topicArn;
   }
 
-  static async publish(params: SnsParams): Promise<void>{
-    try{
-      if(!params.TopicArn){
-        params = {...params, TopicArn: this.#topic};
+  static #parseParams(message: string, params: MessageAttributes): Object{
+    const _params: {[key: string]: any} = {};
+    for (const key in params) {
+      _params[key] = {
+        DataType: "String",
+        StringValue: params[key]
       }
-      const info: any = await new AWS.SNS({apiVersion: '2010-03-31'}).publish({...params, TopicArn: this.#topic}).promise()
-      console.log("MessageID is " + info.MessageId);      
+    }
+
+    return {
+      Message: message,
+      TopicArn: this.#topic,
+      MessageAttributes: _params
+    }
+  }
+
+  static async publish(message: string, params: MessageAttributes = {}): Promise<void>{
+    try{
+      if(!this.#topic){
+        throw "topicArn is missing";
+      }
+      const teste = this.#parseParams(message, params);
+      const info: any = await new AWS.SNS({apiVersion: '2010-03-31'}).publish(teste).promise();
+      console.log("MessageID is " + info.MessageId);
       // console.log(`Message ${params.Message} sent to the topic ${params.TopicArn}`);
     }catch(err: any){
-      console.error(err, err.stack)
+      console.error(err)
     }
   }
 }
