@@ -29,13 +29,13 @@ class Topic {
             __classPrivateFieldSet(this, _a, topicArn, "f", _Topic_topic);
         });
     }
-    static publish(message, params = {}) {
+    static publish(message) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (!__classPrivateFieldGet(this, _a, "f", _Topic_topic)) {
                     throw "topicArn is missing";
                 }
-                const teste = __classPrivateFieldGet(this, _a, "m", _Topic_parseParams).call(this, message, params);
+                const teste = __classPrivateFieldGet(this, _a, "m", _Topic_parseParams).call(this, message);
                 const info = yield new AWS.SNS({ apiVersion: '2010-03-31' }).publish(teste).promise();
                 console.log("MessageID is " + info.MessageId);
                 // console.log(`Message ${params.Message} sent to the topic ${params.TopicArn}`);
@@ -47,18 +47,17 @@ class Topic {
     }
 }
 exports.default = Topic;
-_a = Topic, _Topic_parseParams = function _Topic_parseParams(message, params) {
-    const _params = {};
-    for (const key in params) {
-        _params[key] = {
-            DataType: "String",
-            StringValue: params[key]
-        };
-    }
+_a = Topic, _Topic_parseParams = function _Topic_parseParams(message) {
+    const _data = JSON.parse(message);
     return {
-        Message: message,
+        Message: JSON.stringify(_data),
         TopicArn: __classPrivateFieldGet(this, _a, "f", _Topic_topic),
-        MessageAttributes: _params
+        MessageAttributes: {
+            "type": {
+                DataType: "String",
+                StringValue: _data.type
+            }
+        }
     };
 };
 _Topic_topic = { value: void 0 };

@@ -25,7 +25,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const SNS = __importStar(require("./index"));
 SNS.Topic.setup("arn:aws:sns:sa-east-1:645930412941:center-messages-dev");
-SNS.Topic.publish("Teste", {
-    "type": "document"
-});
+SNS.Topic.publish(JSON.stringify({
+    type: "image",
+    data: {
+        userName: "Maguzy da silva Maguzy da silva Maguzy da silva ",
+        planName: "Familia",
+        startDate: "01/01/1980",
+        document: "438.653.110-67"
+    },
+    dataDocument: {
+        image: "https://s3.sa-east-1.amazonaws.com/assets.dev.nemasaude.com.br/cards/identidade-vertical.png",
+        mask: "https://s3.sa-east-1.amazonaws.com/assets.dev.nemasaude.com.br/cards/CardTemplate2.png"
+    }
+}));
 //# sourceMappingURL=teste.js.map

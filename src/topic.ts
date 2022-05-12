@@ -6,7 +6,8 @@ var AWS = require('aws-sdk');
 // AWS.config.update({region: process.env.AWS_REGION});
 
 type MessageAttributes = {
-  [key: string]: string
+  [key: string]: string,
+  data: any
 }
 
 export default class Topic{
@@ -15,28 +16,26 @@ export default class Topic{
     this.#topic = topicArn;
   }
 
-  static #parseParams(message: string, params: MessageAttributes): Object{
-    const _params: {[key: string]: any} = {};
-    for (const key in params) {
-      _params[key] = {
-        DataType: "String",
-        StringValue: params[key]
-      }
-    }
-
+  static #parseParams(message: string): Object{
+    const _data: MessageAttributes = JSON.parse(message);
     return {
-      Message: message,
+      Message: JSON.stringify(_data),
       TopicArn: this.#topic,
-      MessageAttributes: _params
+      MessageAttributes: {
+        "type":{
+          DataType: "String",
+          StringValue: _data.type
+        }
+      }
     }
   }
 
-  static async publish(message: string, params: MessageAttributes = {}): Promise<void>{
+  static async publish(message: string): Promise<void>{
     try{
       if(!this.#topic){
         throw "topicArn is missing";
       }
-      const teste = this.#parseParams(message, params);
+      const teste = this.#parseParams(message);
       const info: any = await new AWS.SNS({apiVersion: '2010-03-31'}).publish(teste).promise();
       console.log("MessageID is " + info.MessageId);
       // console.log(`Message ${params.Message} sent to the topic ${params.TopicArn}`);
