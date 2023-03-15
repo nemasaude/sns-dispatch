@@ -1,4 +1,6 @@
-require('dotenv').config();
+if(process.env.NODE_ENV == 'development'){
+  require('dotenv').config();
+}
 var AWS = require('aws-sdk');
 // if(!process.env.AWS_REGION){
 //   console.log(`missing environment variable AWS_REGION`);

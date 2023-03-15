@@ -21,7 +21,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 };
 var _a, _Topic_topic, _Topic_parseParams;
 Object.defineProperty(exports, "__esModule", { value: true });
-require('dotenv').config();
+if (process.env.NODE_ENV == 'development') {
+    require('dotenv').config();
+}
 var AWS = require('aws-sdk');
 class Topic {
     static setup(topicArn) {
